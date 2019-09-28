@@ -64,9 +64,57 @@ function shuffle(array) {
     return array;
 }
 
+function renderGameTable(){
+    playerDeck.forEach((card, index) => {
+        let onDeck=$(`#yourCard${index+1}`); //因為index是0 ~ 4，實際上則為1 ~ 5
+        onDeck.html(card.cardNumber());
+    });
+}
+
 class Card {//牌有花色跟數字;
     constructor(suit, number){
         this.suit = suit;
-        this.number = number;
+        this.number = number;   
     }
+
+cardNumber(){
+    switch (this.number){
+        case 1: 
+            return 'A';
+        case 11:
+            return 'J';
+        case 12:
+            return 'Q';
+        case 13:
+            return 'K';
+    }
+}
+
+cardPoint(){//可以叫出牌的代表數值 in blackjack;
+    switch(this.number){
+        case 1: 
+            return 11;
+        case 11: 
+        case 12:
+        case 13: 
+            return 10;
+        default:
+            return this.number;
+    }
+}
+
+cardSuit(){//可以叫出牌的花色;
+    switch(this.suit){
+        case 1:
+            return '♠';
+        case 2:
+            return '♥';
+        case 3:
+            return '♦';
+        case 4:
+            return '♣';
+    }
+}
+
+
 }
