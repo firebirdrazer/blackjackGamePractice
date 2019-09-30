@@ -11,6 +11,7 @@ $(document).ready(function() {//對牌桌初始化;
 })
 
 function newGame() {//開新遊戲;
+    resetGame(); //先清掉上一場遊戲;
     deck = shuffle(buildDeck());//做出牌組並洗牌;
     playerDeck.push(deal());//發給玩家一張牌;
     dealerDeck.push(deal());//發給莊家一張牌;
@@ -85,6 +86,14 @@ function renderGameTable(){//生成雙方檯面上的牌組同時計算點數;
 
     $('.your-cards h1').html(`你 ${playerPoints}點`);
     $('.dealer-cards h1').html(`莊家 ${dealerPoints}點`);
+}
+
+function resetGame(){//清掉上一場遊戲;
+    deck=[];
+    playerDeck = [];
+    dealerDeck = [];
+    playerPoints = 0;
+    dealerPoints = 0;
 }
 
 function calcPoints(deck){//計算牌組的總點數;
