@@ -5,6 +5,7 @@ let dealerDeck = [];
 let playerPoints = 0;
 let dealerPoints = 0;
 let inGame = false;
+let winner = 0;
 
 $(document).ready(function() {//對牌桌初始化;
     initCards();
