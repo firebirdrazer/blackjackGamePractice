@@ -4,6 +4,7 @@ let playerDeck = [];
 let dealerDeck = [];
 let playerPoints = 0;
 let dealerPoints = 0;
+let inGame = false;
 
 $(document).ready(function() {//對牌桌初始化;
     initCards();
@@ -17,6 +18,8 @@ function newGame() {//開新遊戲;
     dealerDeck.push(deal());//發給莊家一張牌;
     playerDeck.push(deal());//再發給玩家一張牌;
 
+    //開始遊戲;
+    inGame = true;
     renderGameTable();//顯示牌組;
     
 }
@@ -25,9 +28,18 @@ function deal() {
     return deck.shift();
 }
 
-function initButtons() {//初始化按鈕(準備發牌);
-    // document.querySelector('#action-new-game').addEventListener('click', event => newGame()); 
+function initButtons() {//初始化按鈕;
+    // document.querySelector('#action-new-game').addEventListener('click', event => newGame());//準備發牌;
     $('#action-new-game').click(event => newGame()); //jQuery寫出同上功能;
+    $('#action-hit').click(event =>{//拿一張牌;
+        event.preventDefault();
+        playerDeck.push(deal());//把牌加進玩家牌組;
+        renderGameTable();
+    });
+    $('#action-stand').click(event =>{//停止叫牌;
+        event.preventDefault();
+        dealerRound();
+    });
 }
 
 function initCards() {//背後加個字;
@@ -81,11 +93,29 @@ function renderGameTable(){//生成雙方檯面上的牌組同時計算點數;
         onDeck.html(card.cardNumber());//秀出牌面;
         onDeck.prev().html(card.cardSuit());//秀出花色;
     });
+    //計算點數;
     playerPoints = calcPoints(playerDeck);
     dealerPoints = calcPoints(dealerDeck);
 
+    //遊戲結束;
+    if (playerPoints >= 21 || dealerPoints >= 21){
+        inGame = false; //遊戲結束
+    }
+
+    //秀點數;
     $('.your-cards h1').html(`你 ${playerPoints}點`);
     $('.dealer-cards h1').html(`莊家 ${dealerPoints}點`);
+
+    //按鈕要打開才能玩;
+    // if(inGame){
+    //     $('#action-hit').attr('disabled',false);
+    //     $('#action-stand').attr('disabled',false);
+    // } else {
+    //     $('#action-hit').attr('disabled',true);
+    //     $('#action-stand').attr('disabled',true);
+    // }
+    $('#action-hit').attr('disabled', !inGame);
+    $('#action-stand').attr('disabled', !inGame);
 }
 
 function resetGame(){//清掉上一場遊戲;
@@ -101,7 +131,30 @@ function calcPoints(deck){//計算牌組的總點數;
     deck.forEach((card, i) => {
         points += card.cardPoint();
     });
+
+    //計算A出現時可做1點或11點
+    if(points > 21){
+        deck.forEach(card => {
+            if(card.cardNumber() === 'A'){
+                points -= 10; //A原本設為11點，讓他直接變成1點
+            }
+        })
+    }
     return points;
+}
+
+function dealerRound(){//如果stand之後停止叫牌，莊家根據手上點數叫牌;
+    while(true){
+        dealerPoints = calcPoints(dealerDeck);
+        playerPoints = calcPoints(playerDeck);
+        if ((dealerPoints < playerPoints)  && (playerPoints <= 21)){
+            dealerDeck.push(deal());
+        } else {
+            break;
+        }
+    }
+    inGame = false;
+    renderGameTable();
 }
 
 class Card {//牌有花色跟數字;
