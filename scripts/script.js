@@ -2,6 +2,8 @@
 
 let playerDeck = [];
 let dealerDeck = [];
+let playerPoints = 0;
+let dealerPoints = 0;
 
 $(document).ready(function() {//對牌桌初始化;
     initCards();
@@ -9,10 +11,14 @@ $(document).ready(function() {//對牌桌初始化;
 })
 
 function newGame() {//開新遊戲;
+    resetGame(); //先清掉上一場遊戲;
     deck = shuffle(buildDeck());//做出牌組並洗牌;
     playerDeck.push(deal());//發給玩家一張牌;
     dealerDeck.push(deal());//發給莊家一張牌;
     playerDeck.push(deal());//再發給玩家一張牌;
+
+    renderGameTable();//顯示牌組;
+    
 }
 
 function deal() {
@@ -64,11 +70,38 @@ function shuffle(array) {
     return array;
 }
 
-function renderGameTable(){
-    playerDeck.forEach((card, index) => {
-        let onDeck=$(`#yourCard${index+1}`); //因為index是0 ~ 4，實際上則為1 ~ 5
-        onDeck.html(card.cardNumber());
+function renderGameTable(){//生成雙方檯面上的牌組同時計算點數;
+    playerDeck.forEach((card, i) => {//先生成玩家的牌組;
+        let onDeck=$(`#yourCard${i+1}`); //因為i是0 ~ 4，實際上則為1 ~ 5
+        onDeck.html(card.cardNumber());//秀出牌面;
+        onDeck.prev().html(card.cardSuit());//秀出花色;
     });
+    dealerDeck.forEach((card, i) => {//再生成莊家的牌組;
+        let onDeck=$(`#dealerCard${i+1}`); //因為i是0 ~ 4，實際上則為1 ~ 5
+        onDeck.html(card.cardNumber());//秀出牌面;
+        onDeck.prev().html(card.cardSuit());//秀出花色;
+    });
+    playerPoints = calcPoints(playerDeck);
+    dealerPoints = calcPoints(dealerDeck);
+
+    $('.your-cards h1').html(`你 ${playerPoints}點`);
+    $('.dealer-cards h1').html(`莊家 ${dealerPoints}點`);
+}
+
+function resetGame(){//清掉上一場遊戲;
+    deck=[];
+    playerDeck = [];
+    dealerDeck = [];
+    playerPoints = 0;
+    dealerPoints = 0;
+}
+
+function calcPoints(deck){//計算牌組的總點數;
+    let points = 0;
+    deck.forEach((card, i) => {
+        points += card.cardPoint();
+    });
+    return points;
 }
 
 class Card {//牌有花色跟數字;
@@ -87,6 +120,8 @@ cardNumber(){
             return 'Q';
         case 13:
             return 'K';
+        default:
+            return this.number;
     }
 }
 
