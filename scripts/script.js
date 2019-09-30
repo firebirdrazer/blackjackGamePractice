@@ -5,7 +5,7 @@ let dealerDeck = [];
 let playerPoints = 0;
 let dealerPoints = 0;
 let inGame = false;
-let winner = 0;
+let winner = 0; //0:勝負未定, 1:玩家贏, 2:莊家贏, 3:平手;
 
 $(document).ready(function() {//對牌桌初始化;
     initCards();
@@ -83,7 +83,51 @@ function shuffle(array) {
     return array;
 }
 
+function checkWinner(){//判斷勝負;
+    switch(true){
+        case playerPoints == 21://玩家直接拿到21點;
+            winner = 1;
+            break;
+        case playerPoints > 21://玩家點數爆;
+            winner = 2;
+            break;
+        case dealerPoints > 21://莊家點數爆;
+            winner = 1;
+            break;
+        case playerPoints == dealerPoints://平手;
+            winner = 3;
+            break;
+    // case playerPoints > dealerPoints://雙方未爆，玩家點數高;
+    //     winner = 1;
+    //     break;
+        case playerPoints < dealerPoints://雙方未爆，莊家點數高;
+            winner = 2;
+            break;
+        default:
+            winner = 0;
+            break;
+    }
+}
+
+function showWinner(){//畫出勝利符號;
+    switch (winner) {
+        case 1: //玩家贏;
+            $('.your-cards').addClass('win');
+            break;
+        case 2: //莊家贏;
+            $('.dealer-cards').addClass('win');
+            break;
+        case 3: //平手;
+            $('.your-cards').addClass('win');
+            $('.dealer-cards').addClass('win');
+            break;
+        default:
+            break;
+    }
+}
+
 function renderGameTable(){//生成雙方檯面上的牌組同時計算點數;
+    
     playerDeck.forEach((card, i) => {//先生成玩家的牌組;
         let onDeck=$(`#yourCard${i+1}`); //因為i是0 ~ 4，實際上則為1 ~ 5
         onDeck.html(card.cardNumber());//秀出牌面;
@@ -107,6 +151,10 @@ function renderGameTable(){//生成雙方檯面上的牌組同時計算點數;
     $('.your-cards h1').html(`你 ${playerPoints}點`);
     $('.dealer-cards h1').html(`莊家 ${dealerPoints}點`);
 
+    
+    checkWinner();
+    showWinner();
+
     //按鈕要打開才能玩;
     // if(inGame){
     //     $('#action-hit').attr('disabled',false);
@@ -125,6 +173,9 @@ function resetGame(){//清掉上一場遊戲;
     dealerDeck = [];
     playerPoints = 0;
     dealerPoints = 0;
+    inGame = false;
+    winner = 0;
+    $('.zone').removeClass('win');
 }
 
 function calcPoints(deck){//計算牌組的總點數;
